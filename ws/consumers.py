@@ -5,6 +5,8 @@ from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 
+from channels.generic.websocket import WebsocketConsumer
+
 import asyncio
 
 User = get_user_model()
@@ -15,6 +17,8 @@ class ChatConsumer(AsyncConsumer):
             "test",
             self.channel_name
         )
+
+        print(self.scope['user'])
         # users = await self.get_users()
         await self.send(
             {
@@ -27,8 +31,18 @@ class ChatConsumer(AsyncConsumer):
         pass
 
     async def websocket_receive(self, event):
+        print(event)
+        event = {
+            "type": "chat_message",
+            "text": event['text']
+            }
         await self.channel_layer.group_send(
             "test",
+            event
+        )
+
+    async def chat_message(self, event):
+        await self.send(
             {
                 "type": "websocket.send",
                 "text": event['text']
