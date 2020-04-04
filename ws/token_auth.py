@@ -15,10 +15,10 @@ class TokenAuthMiddleware:
 
     def __call__(self, scope):
         try:
+            close_old_connections()
             token_key = parse_qs(scope["query_string"].decode("utf8"))["token"][0]
             token = Token.objects.get(key=token_key)
             scope['user'] = token.user
-            close_old_connections()
         except:
             scope['user'] = AnonymousUser()
         return self.inner(scope)
